@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,8 +56,9 @@ public class BrokerStartup {
     public static InternalLogger log;
 
     public static void main(String[] args) {
+        System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY,"F:\\workspace\\home");
         System.setProperty(MixAll.NAMESRV_ADDR_PROPERTY,"127.0.0.1:9878");
-        System.setProperty("user.home","D:\\workspace\\home");
+        System.setProperty("user.home","F:\\workspace\\home");
         start(createBrokerController(args));
     }
 
@@ -189,7 +191,8 @@ public class BrokerStartup {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(lc);
             lc.reset();
-            configurator.doConfigure(brokerConfig.getRocketmqHome() + "/conf/logback_broker.xml");
+//            configurator.doConfigure(brokerConfig.getRocketmqHome() + "/conf/logback_broker.xml");
+            configurator.doConfigure(Objects.requireNonNull(BrokerStartup.class.getClassLoader().getResource("logback.xml")));
 
             if (commandLine.hasOption('p')) {
                 InternalLogger console = InternalLoggerFactory.getLogger(LoggerName.BROKER_CONSOLE_NAME);
