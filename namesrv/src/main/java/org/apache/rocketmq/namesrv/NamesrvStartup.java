@@ -36,20 +36,45 @@ import org.apache.rocketmq.common.constant.LoggerName;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.common.namesrv.NamesrvConfig;
+import org.apache.rocketmq.namesrv.processor.DefaultRequestProcessor;
+import org.apache.rocketmq.remoting.netty.NettyRemotingAbstract;
 import org.apache.rocketmq.remoting.netty.NettyServerConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.srvutil.ServerUtil;
 import org.apache.rocketmq.srvutil.ShutdownHookThread;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ *
+ * @see NettyRemotingAbstract#processMessageReceived(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
+ *
+ * @see DefaultRequestProcessor#processRequest(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
+ *
+ *
+ *  注册broker
+ * @see  DefaultRequestProcessor#registerBrokerWithFilterServer(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
+ *
+ */
 public class NamesrvStartup {
+
+
+
+    public final static int PORT = 9878;
+
+    public final static String HOME_PATH = "D:/workspace/home";
+
+
+
+
+
 
     private static InternalLogger log;
     private static Properties properties = null;
     private static CommandLine commandLine = null;
 
     public static void main(String[] args) {
-        System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY,"F:\\workspace\\home");
+        System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY,HOME_PATH);
         main0(args);
     }
 
@@ -83,7 +108,7 @@ public class NamesrvStartup {
 
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
-        nettyServerConfig.setListenPort(9878);
+        nettyServerConfig.setListenPort(PORT);
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
             if (file != null) {

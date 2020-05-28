@@ -50,15 +50,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 
 public class BrokerStartup {
+
+    public final static String NAME_SERVER_ADDRESS = "127.0.0.1:9878";
+    public final static String HOME_PATH = "D:/workspace/home";
+    public final static int PORT = 10952;
+
+
+
     public static Properties properties = null;
     public static CommandLine commandLine = null;
     public static String configFile = null;
     public static InternalLogger log;
 
     public static void main(String[] args) {
-        System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY,"F:\\workspace\\home");
-        System.setProperty(MixAll.NAMESRV_ADDR_PROPERTY,"127.0.0.1:9878");
-        System.setProperty("user.home","F:\\workspace\\home");
+        System.setProperty(MixAll.ROCKETMQ_HOME_PROPERTY,HOME_PATH);
+        System.setProperty(MixAll.NAMESRV_ADDR_PROPERTY,NAME_SERVER_ADDRESS);
+        System.setProperty("user.home",HOME_PATH);
         start(createBrokerController(args));
     }
 
@@ -117,7 +124,7 @@ public class BrokerStartup {
 
             nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE,
                 String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
-            nettyServerConfig.setListenPort(10952);
+            nettyServerConfig.setListenPort(PORT);
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
             if (BrokerRole.SLAVE == messageStoreConfig.getBrokerRole()) {
