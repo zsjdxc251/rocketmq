@@ -22,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.rocketmq.broker.processor.SendMessageProcessor;
 import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
@@ -49,10 +50,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 
+/**
+ *
+ *
+ *  处理发送消息
+ * @see SendMessageProcessor
+ *
+ *
+ *
+ *  处理发送结果
+ * @see  SendMessageProcessor#handlePutMessageResult(org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader, org.apache.rocketmq.broker.mqtrace.SendMessageContext, io.netty.channel.ChannelHandlerContext, int)
+ */
 public class BrokerStartup {
 
     public final static String NAME_SERVER_ADDRESS = "127.0.0.1:9878";
-    public final static String HOME_PATH = "D:/workspace/home";
+    public final static String HOME_PATH = "F:/workspace/home";
     public final static int PORT = 10952;
 
 

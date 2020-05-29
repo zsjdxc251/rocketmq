@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
+ *  处理请求还是响应
  * @see NettyRemotingAbstract#processMessageReceived(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
  *
  * @see DefaultRequestProcessor#processRequest(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
@@ -55,6 +56,8 @@ import org.slf4j.LoggerFactory;
  *  注册broker
  * @see  DefaultRequestProcessor#registerBrokerWithFilterServer(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)
  *
+ *
+ * @see org.apache.rocketmq.common.protocol.RequestCode
  */
 public class NamesrvStartup {
 
@@ -62,7 +65,7 @@ public class NamesrvStartup {
 
     public final static int PORT = 9878;
 
-    public final static String HOME_PATH = "D:/workspace/home";
+    public final static String HOME_PATH = "F:/workspace/home";
 
 
 
