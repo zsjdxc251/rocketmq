@@ -64,7 +64,7 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 public class BrokerStartup {
 
     public final static String NAME_SERVER_ADDRESS = "127.0.0.1:9878";
-    public final static String HOME_PATH = "F:/workspace/home";
+    public final static String HOME_PATH = "D:/workspace/home";
     public final static int PORT = 10952;
 
 
