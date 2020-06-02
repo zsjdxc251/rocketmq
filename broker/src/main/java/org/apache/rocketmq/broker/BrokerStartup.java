@@ -23,6 +23,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.rocketmq.broker.processor.SendMessageProcessor;
+import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
@@ -52,6 +53,30 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 
 /**
  *
+ *  "messageQueue":{
+ * 		"brokerName":"zhengsj_1VYV1S2",
+ * 		"queueId":0,
+ * 		"topic":"TopicTest"
+ *  }
+ *   messageQueue 在client 段选取
+ *
+ *
+ *
+ *  result :{
+ * 	"messageQueue":{
+ * 		"brokerName":"zhengsj_1VYV1S2",
+ * 		"queueId":3,        store\consumequeue\{topicName}\queueId   客户端发送给服务端
+ * 		"topic":"TopicTest"
+ *  },
+ *
+ *    {@link MQClientAPIImpl#processSendResponse(java.lang.String, org.apache.rocketmq.common.message.Message, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
+ * 	 "msgId":"A9FE3740000018B4AAC208E4B8050000",  客户端生成
+ * 	 "offsetMsgId":"0A00804F00002AC8000000000000B49C", 服务端生成
+ * 	 "queueOffset":57,
+ * 	 "regionId":"DefaultRegion",
+ * 	"sendStatus":"SEND_OK",
+ * 	"traceOn":true
+ * }
  *
  *  处理发送消息
  * @see SendMessageProcessor
@@ -64,7 +89,7 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
 public class BrokerStartup {
 
     public final static String NAME_SERVER_ADDRESS = "127.0.0.1:9878";
-    public final static String HOME_PATH = "D:/workspace/home";
+    public final static String HOME_PATH = "F:/workspace/home";
     public final static int PORT = 10952;
 
 

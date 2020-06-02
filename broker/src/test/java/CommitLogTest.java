@@ -1,3 +1,4 @@
+
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -21,14 +22,72 @@ import java.util.stream.Stream;
 public class CommitLogTest {
 
 
+    @Test
     public void test1() throws IOException {
 
-        RandomAccessFile file = new RandomAccessFile( "D:\\workspace\\home\\store\\commitlog\\00000000000000000000", "rw" );
+        RandomAccessFile file = new RandomAccessFile( "F:\\workspace\\home\\store\\commitlog\\00000000000000000000", "r" );
 
         FileChannel channel = file.getChannel();
 
-        System.out.println(channel.size());
-        MappedByteBuffer mbb = channel.map(FileChannel.MapMode.READ_WRITE,0,channel.size());
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1279614804);
+
+        System.out.println(byteBuffer.position()+","+byteBuffer.limit());
+        //byteBuffer.flip();
+
+        System.out.println(byteBuffer.position()+","+byteBuffer.limit());
+        channel.read(byteBuffer);
+        System.out.println(byteBuffer.position()+","+byteBuffer.limit());
+        byteBuffer.flip();
+        System.out.println(byteBuffer.position()+","+byteBuffer.limit());
+        byteBuffer.getInt();
+
+        byteBuffer.getInt();
+
+        byteBuffer.getInt();
+
+        byteBuffer.getInt();
+
+        byteBuffer.getInt();
+
+        byteBuffer.getLong();
+
+        byteBuffer.getLong();
+
+        byteBuffer.getInt();
+
+        byteBuffer.getLong();
+
+        byteBuffer.get(new byte[16]);
+
+        byteBuffer.getLong();
+
+        byteBuffer.get(new byte[16]);
+
+        byteBuffer.getInt();
+
+        byteBuffer.getLong();
+
+        int bodyLen = byteBuffer.getInt();
+
+        if (bodyLen > 0){
+            System.out.println(bodyLen);
+            byte[] bodys =  new byte[1073741720];
+           // System.out.println(byteBuffer.remaining());
+            byteBuffer.get(bodys);
+            System.out.println(new String(bodys));
+        }
+
+        byte topicLen = byteBuffer.get();
+        byte[] topic =  new byte[topicLen];
+        byteBuffer.get(topic);
+
+       short len =  byteBuffer.getShort();
+
+        byte[] data =  new byte[len];
+
+        byteBuffer.get(data);
+ //       System.out.println(channel.size());
+ //       MappedByteBuffer mbb = channel.map(FileChannel.MapMode.READ_WRITE,0,channel.size());
 //
 //        for (long i=0;i<channel.size();i++){
 //            mappedByteBuffer.put((byte)(i*10));
@@ -37,20 +96,8 @@ public class CommitLogTest {
 
 
 
-       // mbb.put(a.getBytes());
 
-        //mbb.flip();
-        channel.close();
-        byte[] bb = new byte[2014];
-        while (mbb.hasRemaining()){
-            byte b = mbb.get();
-            if (mbb.position() >= 2014){
-                break;
-            }
-            System.out.println(mbb.position());
-            bb[mbb.position()]=b;
-        }
-        System.out.println(new String(bb));
+
 
         file.close();
 
@@ -64,31 +111,31 @@ public class CommitLogTest {
     @Test
     public void test2() throws IOException {
 
-        String fileName_or_phyficalOffset = "00000000000000000000";
-        Path path = Paths.get("D:\\workspace\\home\\store\\commitlog", fileName_or_phyficalOffset);
-        FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ);
-        // 设大一点，尽量一次读取完一条消息的完整字节。
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2048);
-
-        fileChannel.read(byteBuffer);
-        // 输出commitLog的信息
-
-
-        byteBuffer.flip();
-        // 记录消息总长度，每一次操作记录一次，最终与读取的消息总长度对比
-        int totalLength = 0;
-        int totalLengthF = byteBuffer.getInt();
-
-        System.out.println(totalLengthF);
-        //println("TOTALSIZE，该消息总长度4字节",totalLengthF);
-        //totalLength+=4;
-
-
-        System.out.println(byteBuffer.getInt());
-
-        byte[] magic = new byte[4];
-        byteBuffer.get(magic);
-        System.out.println(new String(magic));
+//        String fileName_or_phyficalOffset = "00000000000000000000";
+//        Path path = Paths.get("D:\\workspace\\home\\store\\commitlog", fileName_or_phyficalOffset);
+//        FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ);
+//        // 设大一点，尽量一次读取完一条消息的完整字节。
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(2048);
+//
+//        fileChannel.read(byteBuffer);
+//        // 输出commitLog的信息
+//
+//
+//        byteBuffer.flip();
+//        // 记录消息总长度，每一次操作记录一次，最终与读取的消息总长度对比
+//        int totalLength = 0;
+//        int totalLengthF = byteBuffer.getInt();
+//
+//        System.out.println(totalLengthF);
+//        //println("TOTALSIZE，该消息总长度4字节",totalLengthF);
+//        //totalLength+=4;
+//
+//
+//        System.out.println(byteBuffer.getInt());
+//
+//        byte[] magic = new byte[4];
+//        byteBuffer.get(magic);
+//        System.out.println(new String(magic));
 
        // System.out.println(new String(byteBuffer.array()));
 //        byte[] magic = new byte[4];
