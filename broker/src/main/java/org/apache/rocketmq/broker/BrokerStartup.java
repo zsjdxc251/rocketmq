@@ -110,7 +110,7 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *
  *
- *
+ *   {@link DefaultMessageStore#doDispatch(org.apache.rocketmq.store.DispatchRequest)}
  *
  *
  *
@@ -121,7 +121,9 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *     {@link ConsumeQueue#putMessagePositionInfoWrapper(org.apache.rocketmq.store.DispatchRequest)}
  *
  *
+ *  index
  *
+ *  {@link DefaultMessageStore.CommitLogDispatcherBuildIndex}
  *
  *
  */
