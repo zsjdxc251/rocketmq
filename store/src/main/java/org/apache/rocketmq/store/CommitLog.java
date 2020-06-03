@@ -1551,6 +1551,7 @@ public class CommitLog {
             keyBuilder.append(msgInner.getQueueId());
             // Topic-0/1/2/3
             String key = keyBuilder.toString();
+            // 等于 client queueOffset
             Long queueOffset = CommitLog.this.topicQueueTable.get(key);
             if (null == queueOffset) {
                 queueOffset = 0L;

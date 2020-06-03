@@ -38,8 +38,12 @@ import org.apache.rocketmq.remoting.netty.NettySystemConfig;
 import org.apache.rocketmq.remoting.netty.TlsSystemConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.srvutil.ServerUtil;
+import org.apache.rocketmq.store.CommitLog;
+import org.apache.rocketmq.store.ConsumeQueue;
+import org.apache.rocketmq.store.DefaultMessageStore;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.MessageStoreConfig;
+import org.apache.rocketmq.store.index.IndexFile;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
@@ -71,6 +75,7 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *    {@link MQClientAPIImpl#processSendResponse(java.lang.String, org.apache.rocketmq.common.message.Message, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
  * 	 "msgId":"A9FE3740000018B4AAC208E4B8050000",  客户端生成
+ * 	 {@link CommitLog.DefaultAppendMessageCallback#doAppend(long, java.nio.ByteBuffer, int, org.apache.rocketmq.store.MessageExtBrokerInner)}
  * 	 "offsetMsgId":"0A00804F00002AC8000000000000B49C", 服务端生成
  * 	 "queueOffset":57,
  * 	 "regionId":"DefaultRegion",
@@ -78,13 +83,47 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  * 	"traceOn":true
  * }
  *
+ *
+ *
+ *  store
+ *
+ *  {@link ConsumeQueue#ConsumeQueue(java.lang.String, int, java.lang.String, int, org.apache.rocketmq.store.DefaultMessageStore)}
+ *
+ *  {@link CommitLog}
+ *
+ *  {@link IndexFile}
+ *
+ *
  *  处理发送消息
  * @see SendMessageProcessor
  *
+ * {@link MessageStoreConfig}
  *
+ *
+ *   一条消息跨文件存储？
+ *
+ *   如何知道该文件的偏移量 {@link DefaultMessageStore#recover(boolean)} {@link CommitLog#recoverNormally(long)}
  *
  *  处理发送结果
  * @see  SendMessageProcessor#handlePutMessageResult(org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader, org.apache.rocketmq.broker.mqtrace.SendMessageContext, io.netty.channel.ChannelHandlerContext, int)
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * {@link DefaultMessageStore.ReputMessageService}
+ *
+ * {@link DefaultMessageStore#putMessagePositionInfo(org.apache.rocketmq.store.DispatchRequest)}
+ *
+ *     {@link ConsumeQueue#putMessagePositionInfoWrapper(org.apache.rocketmq.store.DispatchRequest)}
+ *
+ *
+ *
+ *
+ *
  */
 public class BrokerStartup {
 
