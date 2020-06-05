@@ -22,6 +22,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.rocketmq.broker.offset.ConsumerOffsetManager;
+import org.apache.rocketmq.broker.processor.PullMessageProcessor;
 import org.apache.rocketmq.broker.processor.SendMessageProcessor;
 import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.common.BrokerConfig;
@@ -41,9 +43,11 @@ import org.apache.rocketmq.srvutil.ServerUtil;
 import org.apache.rocketmq.store.CommitLog;
 import org.apache.rocketmq.store.ConsumeQueue;
 import org.apache.rocketmq.store.DefaultMessageStore;
+import org.apache.rocketmq.store.DispatchRequest;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.MessageStoreConfig;
 import org.apache.rocketmq.store.index.IndexFile;
+import org.apache.rocketmq.store.schedule.ScheduleMessageService;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
@@ -126,6 +130,35 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *  {@link DefaultMessageStore.CommitLogDispatcherBuildIndex}
  *
  *
+ *
+ *  {@link CommitLog#checkMessageAndReturnSize(java.nio.ByteBuffer, boolean, boolean)} find {@link DispatchRequest}
+ *
+ * 刷盘操作
+ *
+ *
+ *   {@link CommitLog.CommitRealTimeService}
+ *   {@link CommitLog.FlushRealTimeService}
+ *   {@link CommitLog.GroupCommitService}
+ *
+ *   {@link CommitLog#handleDiskFlush(org.apache.rocketmq.store.AppendMessageResult, org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.common.message.MessageExt)}
+ *
+ *
+ *
+ *  ConsumQueue
+ *
+ *  {@link PullMessageProcessor#processRequest(io.netty.channel.Channel, org.apache.rocketmq.remoting.protocol.RemotingCommand, boolean)}
+ *
+ *  {@link PullMessageProcessor#executeRequestWhenWakeup(io.netty.channel.Channel, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
+ *
+ *
+ *  consumerOffset.json 文件
+ *   修改
+ *  {@link ConsumerOffsetManager#commitOffset(java.lang.String, java.lang.String, java.lang.String, int, long)}
+ *     {@link BrokerController#getQueryThreadPoolQueue()} 调度器
+ *
+ *
+ *  延迟队列调度
+ *  {@link ScheduleMessageService.DeliverDelayedMessageTimerTask}
  */
 public class BrokerStartup {
 

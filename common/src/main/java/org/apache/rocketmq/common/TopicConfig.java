@@ -25,6 +25,8 @@ public class TopicConfig {
     private String topicName;
     private int readQueueNums = defaultReadQueueNums;
     private int writeQueueNums = defaultWriteQueueNums;
+
+    // 表明该topic的权限，可读（4）、可写（2）、可继承（1），通过位运算组合
     private int perm = PermName.PERM_READ | PermName.PERM_WRITE;
     private TopicFilterType topicFilterType = TopicFilterType.SINGLE_TAG;
     private int topicSysFlag = 0;

@@ -329,7 +329,7 @@ public class CommitLog {
                 propertiesMap = MessageDecoder.string2messageProperties(properties);
 
                 keys = propertiesMap.get(MessageConst.PROPERTY_KEYS);
-
+                // uniqKey 等于  client msgId
                 uniqKey = propertiesMap.get(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
 
                 String tags = propertiesMap.get(MessageConst.PROPERTY_TAGS);
