@@ -1101,6 +1101,7 @@ public class MQClientAPIImpl {
         final String consumerGroup,
         final int delayLevel,
         final long timeoutMillis,
+        // 默认是16次 最大的重试次数
         final int maxConsumeRetryTimes
     ) throws RemotingException, MQBrokerException, InterruptedException {
         ConsumerSendMsgBackRequestHeader requestHeader = new ConsumerSendMsgBackRequestHeader();

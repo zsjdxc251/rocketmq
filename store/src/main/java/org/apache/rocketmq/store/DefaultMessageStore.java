@@ -1902,6 +1902,10 @@ public class DefaultMessageStore implements MessageStore {
 
                                     if (BrokerRole.SLAVE != DefaultMessageStore.this.getMessageStoreConfig().getBrokerRole()
                                         && DefaultMessageStore.this.brokerConfig.isLongPollingEnable()) {
+                                        /**
+                                         * 触发 PullRequestHoldService 唤醒 5s 不能达到实时
+                                         * {@link  org.apache.rocketmq.broker.longpolling.NotifyMessageArrivingListener#arriving(java.lang.String, int, long, long, long, byte[], java.util.Map) }
+                                         */
                                         DefaultMessageStore.this.messageArrivingListener.arriving(dispatchRequest.getTopic(),
                                             dispatchRequest.getQueueId(), dispatchRequest.getConsumeQueueOffset() + 1,
                                             dispatchRequest.getTagsCode(), dispatchRequest.getStoreTimestamp(),

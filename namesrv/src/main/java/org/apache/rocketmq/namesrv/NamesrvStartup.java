@@ -65,7 +65,7 @@ public class NamesrvStartup {
 
     public final static int PORT = 9878;
 
-    public final static String HOME_PATH = "F:/workspace/home";
+    public final static String HOME_PATH = "D:/workspace/home";
 
 
 

@@ -18,14 +18,21 @@ package org.apache.rocketmq.broker;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.rocketmq.broker.longpolling.PullRequestHoldService;
 import org.apache.rocketmq.broker.offset.ConsumerOffsetManager;
 import org.apache.rocketmq.broker.processor.PullMessageProcessor;
 import org.apache.rocketmq.broker.processor.SendMessageProcessor;
+import org.apache.rocketmq.client.ClientConfig;
+import org.apache.rocketmq.client.consumer.AllocateMessageQueueStrategy;
+import org.apache.rocketmq.client.consumer.store.OffsetStore;
 import org.apache.rocketmq.client.impl.MQClientAPIImpl;
+import org.apache.rocketmq.client.impl.consumer.ConsumeMessageConcurrentlyService;
+import org.apache.rocketmq.client.impl.consumer.RebalanceImpl;
 import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
@@ -81,7 +88,7 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  * 	 "msgId":"A9FE3740000018B4AAC208E4B8050000",  客户端生成
  * 	 {@link CommitLog.DefaultAppendMessageCallback#doAppend(long, java.nio.ByteBuffer, int, org.apache.rocketmq.store.MessageExtBrokerInner)}
  * 	 "offsetMsgId":"0A00804F00002AC8000000000000B49C", 服务端生成
- * 	 "queueOffset":57,
+ * 	 "queueOffset":57,    queueOffset & 20 = 真正的偏移量
  * 	 "regionId":"DefaultRegion",
  * 	"sendStatus":"SEND_OK",
  * 	"traceOn":true
@@ -159,11 +166,65 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *  延迟队列调度
  *  {@link ScheduleMessageService.DeliverDelayedMessageTimerTask}
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *  Consumer {@link PullMessageProcessor#processRequest(ChannelHandlerContext, RemotingCommand)}
+ *
+ *     {@link DefaultMessageStore#getMessage(java.lang.String, java.lang.String, int, long, int, org.apache.rocketmq.store.MessageFilter)}
+ *
+ *  {@link PullRequestHoldService} 每隔5s一次
+ *
+ *
+ *
+ *  消息队列负载 与 重新  分布机制
+ *
+ *   {@link RebalanceImpl#doRebalance(boolean)}
+ *
+ *   {@link AllocateMessageQueueStrategy} 队列分配算法接口
+ *     分配规则和 {@link ClientConfig#setInstanceName(java.lang.String)} 有关系如果是一样的则两个都会分配一样的queueId
+ *
+ *
+ *   消费过程
+ *
+ *   {@link ConsumeMessageConcurrentlyService#submitConsumeRequest(java.util.List, org.apache.rocketmq.client.impl.consumer.ProcessQueue, org.apache.rocketmq.common.message.MessageQueue, boolean)}
+ *
+ *  处理消费结果
+ *  {@link ConsumeMessageConcurrentlyService#processConsumeResult(org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus, org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext, org.apache.rocketmq.client.impl.consumer.ConsumeMessageConcurrentlyService.ConsumeRequest)}
+ *
+ *  发送ack
+ *  {@link ConsumeMessageConcurrentlyService#sendMessageBack(org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext)}
+ *
+ *  服务端 接收
+ *  {@link SendMessageProcessor#asyncConsumerSendMsgBack(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
+ *
+ *  消费进度管理
+ *  {@link OffsetStore}
+ *
+ *  %RETRY%please_rename_unique_group_name
+ *
+ *
+ *  定时消息机制
+ *
+ *  {@link ScheduleMessageService}
+ *
+ *
+ *  刷盘
+ * {@link CommitLog.GroupCommitService}
+ *
  */
 public class BrokerStartup {
 
     public final static String NAME_SERVER_ADDRESS = "127.0.0.1:9878";
-    public final static String HOME_PATH = "F:/workspace/home";
+    public final static String HOME_PATH = "D:/workspace/home";
     public final static int PORT = 10952;
 
 
