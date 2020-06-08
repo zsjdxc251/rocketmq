@@ -223,6 +223,7 @@ public class HAConnection {
 
                     if (-1 == this.nextTransferFromWhere) {
                         if (0 == HAConnection.this.slaveRequestOffset) {
+                            // slaveRequestOffset 等于0 则从当前commitLog文件最大的便宜量开始传输，否则从服务端拉取请求的偏移量开始请求
                             long masterOffset = HAConnection.this.haService.getDefaultMessageStore().getCommitLog().getMaxOffset();
                             masterOffset =
                                 masterOffset
@@ -279,6 +280,7 @@ public class HAConnection {
                         this.nextTransferFromWhere += size;
 
                         selectResult.getByteBuffer().limit(size);
+                        // Body
                         this.selectMappedBufferResult = selectResult;
 
                         // Build Header
@@ -287,7 +289,7 @@ public class HAConnection {
                         this.byteBufferHeader.putLong(thisOffset);
                         this.byteBufferHeader.putInt(size);
                         this.byteBufferHeader.flip();
-
+                        // 发起写
                         this.lastWriteOver = this.transferData();
                     } else {
 

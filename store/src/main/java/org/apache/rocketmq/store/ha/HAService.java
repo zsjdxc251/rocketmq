@@ -157,6 +157,9 @@ public class HAService {
      * Listens to slave connections to create {@link HAConnection}.
      */
     class AcceptSocketService extends ServiceThread {
+        /**
+         * 监听套接字 ip + 端口
+         */
         private final SocketAddress socketAddressListen;
         private ServerSocketChannel serverSocketChannel;
         private Selector selector;
@@ -284,6 +287,7 @@ public class HAService {
                             + HAService.this.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout();
                         while (!transferOK && HAService.this.defaultMessageStore.getSystemClock().now() < waitUntilWhen) {
                             this.notifyTransferObject.waitForRunning(1000);
+                            // 成功复制的最大偏移量是否大于等于消息生产者发送消息后消息服务端返回下一条消息的起始偏移量
                             transferOK = HAService.this.push2SlaveMaxOffset.get() >= req.getNextOffset();
                         }
 

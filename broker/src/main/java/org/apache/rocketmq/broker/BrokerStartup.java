@@ -25,6 +25,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.rocketmq.broker.longpolling.PullRequestHoldService;
 import org.apache.rocketmq.broker.offset.ConsumerOffsetManager;
+import org.apache.rocketmq.broker.processor.ConsumerManageProcessor;
 import org.apache.rocketmq.broker.processor.PullMessageProcessor;
 import org.apache.rocketmq.broker.processor.SendMessageProcessor;
 import org.apache.rocketmq.client.ClientConfig;
@@ -32,7 +33,9 @@ import org.apache.rocketmq.client.consumer.AllocateMessageQueueStrategy;
 import org.apache.rocketmq.client.consumer.store.OffsetStore;
 import org.apache.rocketmq.client.impl.MQClientAPIImpl;
 import org.apache.rocketmq.client.impl.consumer.ConsumeMessageConcurrentlyService;
+import org.apache.rocketmq.client.impl.consumer.PullAPIWrapper;
 import org.apache.rocketmq.client.impl.consumer.RebalanceImpl;
+import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
@@ -53,6 +56,8 @@ import org.apache.rocketmq.store.DefaultMessageStore;
 import org.apache.rocketmq.store.DispatchRequest;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.MessageStoreConfig;
+import org.apache.rocketmq.store.ha.HAConnection;
+import org.apache.rocketmq.store.ha.HAService;
 import org.apache.rocketmq.store.index.IndexFile;
 import org.apache.rocketmq.store.schedule.ScheduleMessageService;
 import org.slf4j.LoggerFactory;
@@ -211,6 +216,9 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *  %RETRY%please_rename_unique_group_name
  *
+ *  客户端发送
+ *  {@link ConsumerManageProcessor#processRequest(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
+ *
  *
  *  定时消息机制
  *
@@ -218,7 +226,33 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *
  *  刷盘
+ * {@link CommitLog#handleDiskFlush(org.apache.rocketmq.store.AppendMessageResult, org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.common.message.MessageExt)}
  * {@link CommitLog.GroupCommitService}
+ *
+ *
+ *  主从复制原理
+ *  {@link CommitLog#submitReplicaRequest(org.apache.rocketmq.store.AppendMessageResult, org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.common.message.MessageExt)}
+ * {@link CommitLog#handleHA(org.apache.rocketmq.store.AppendMessageResult, org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.common.message.MessageExt)}
+ *    {@link HAService} # {@link HAService.AcceptSocketService} 监听客户端连接实现类
+ *                      # {@link HAService.GroupTransferService} 主从同步通知实现类
+ *                      # {@link HAService.HAClient} 客户端实现类
+ *    {@link HAConnection} Ha master 服务端HA 连接对象的封装 与 broker 从服务器的网关读写实现类
+ *                      # {@link HAConnection.ReadSocketService} 网络读实现类
+ *                      # {@link HAConnection.WriteSocketService} 网络写实现类
+ *
+ *
+ *    {@link HAService.GroupTransferService} 处理同步结果
+ *
+ *    slave 连接 master {@link HAService.HAClient#connectMaster()}
+ *
+ *    master 处理 slave 请求 {@link HAConnection}
+ *
+ *
+ *  RocketMq 读写分离机制
+ *  {@link MQClientInstance#findBrokerAddressInSubscribe(java.lang.String, long, boolean)}
+ *
+ *      根据消费队列获取 brokerId 实现
+ *      {@link PullAPIWrapper#recalculatePullFromWhichNode(org.apache.rocketmq.common.message.MessageQueue)}
  *
  */
 public class BrokerStartup {
