@@ -575,6 +575,7 @@ public class CommitLog {
 
             /**
              *  修改为延迟队列 topic
+             *  等级从1开始
              */
             if (msg.getDelayTimeLevel() > 0) {
                 if (msg.getDelayTimeLevel() > this.defaultMessageStore.getScheduleMessageService().getMaxDelayLevel()) {

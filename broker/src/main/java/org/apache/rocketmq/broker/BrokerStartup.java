@@ -26,8 +26,12 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.rocketmq.broker.longpolling.PullRequestHoldService;
 import org.apache.rocketmq.broker.offset.ConsumerOffsetManager;
 import org.apache.rocketmq.broker.processor.ConsumerManageProcessor;
+import org.apache.rocketmq.broker.processor.EndTransactionProcessor;
 import org.apache.rocketmq.broker.processor.PullMessageProcessor;
 import org.apache.rocketmq.broker.processor.SendMessageProcessor;
+import org.apache.rocketmq.broker.transaction.AbstractTransactionalMessageCheckListener;
+import org.apache.rocketmq.broker.transaction.TransactionalMessageCheckService;
+import org.apache.rocketmq.broker.transaction.queue.TransactionalMessageServiceImpl;
 import org.apache.rocketmq.client.ClientConfig;
 import org.apache.rocketmq.client.consumer.AllocateMessageQueueStrategy;
 import org.apache.rocketmq.client.consumer.store.OffsetStore;
@@ -36,10 +40,12 @@ import org.apache.rocketmq.client.impl.consumer.ConsumeMessageConcurrentlyServic
 import org.apache.rocketmq.client.impl.consumer.PullAPIWrapper;
 import org.apache.rocketmq.client.impl.consumer.RebalanceImpl;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
+import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.BrokerConfig;
 import org.apache.rocketmq.common.MQVersion;
 import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.common.constant.LoggerName;
+import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
@@ -50,6 +56,7 @@ import org.apache.rocketmq.remoting.netty.NettySystemConfig;
 import org.apache.rocketmq.remoting.netty.TlsSystemConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import org.apache.rocketmq.srvutil.ServerUtil;
+import org.apache.rocketmq.store.AppendMessageStatus;
 import org.apache.rocketmq.store.CommitLog;
 import org.apache.rocketmq.store.ConsumeQueue;
 import org.apache.rocketmq.store.DefaultMessageStore;
@@ -116,9 +123,12 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  * {@link MessageStoreConfig}
  *
  *
- *   一条消息跨文件存储？
+ *   一条消息跨文件存储
+ *   {@link AppendMessageStatus#END_OF_FILE}
  *
  *   如何知道该文件的偏移量 {@link DefaultMessageStore#recover(boolean)} {@link CommitLog#recoverNormally(long)}
+ *
+ *   刷盘
  *
  *  处理发送结果
  * @see  SendMessageProcessor#handlePutMessageResult(org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader, org.apache.rocketmq.broker.mqtrace.SendMessageContext, io.netty.channel.ChannelHandlerContext, int)
@@ -253,6 +263,58 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *      根据消费队列获取 brokerId 实现
  *      {@link PullAPIWrapper#recalculatePullFromWhichNode(org.apache.rocketmq.common.message.MessageQueue)}
+ *
+ *
+ * 事务消息
+ *
+ *  {@link EndTransactionProcessor#processRequest(io.netty.channel.ChannelHandlerContext, org.apache.rocketmq.remoting.protocol.RemotingCommand)}
+ *
+ *  回查事务
+ *  {@link TransactionalMessageCheckService}
+ *
+ *  回查频率默认是1分钟一次 {@link BrokerConfig#transactionCheckMax} 单位毫秒
+ *
+ *  回查最大次数 {@link BrokerConfig#getTransactionCheckMax()}
+ *
+ *  {@link TransactionalMessageServiceImpl#check(long, int, org.apache.rocketmq.broker.transaction.AbstractTransactionalMessageCheckListener)}
+ *
+ *  操作过程
+ *
+ *   当返回是commit 时删除
+ *
+ *   当回滚
+ *
+ *   当返回未知
+ *    {@link TransactionalMessageCheckService#onWaitEnd()} 系统会以一分钟的频率调用检查
+ *      首先会获取 RMQ_SYS_TRANS_HALF_TOPIC 消费进度进行查询消息如果获取不到代表没有需要进行事务回调则跳过
+ *        如果获取有则会获取 RMQ_SYS_TRANS_OP_HALF_TOPIC 消费进度获取 消费进度获取所有操作记录
+ *            RMQ_SYS_TRANS_OP_HALF_TOPIC 对应的commitLog body 对应的是 RMQ_SYS_TRANS_HALF_TOPIC 偏移量 操作commit数据
+ *
+ *       调用chechek 的时候会再次发起 {@link TransactionListener#checkLocalTransaction(org.apache.rocketmq.common.message.MessageExt)}
+ *       检测如果是 commit RMQ_SYS_TRANS_OP_HALF_TOPIC 偏移量会加1 ，如果未知的话 会再新增一个 RMQ_SYS_TRANS_HALF_TOPIC 消息 偏移量加1
+ *          检查数{@link MessageConst#PROPERTY_TRANSACTION_CHECK_TIMES} 会加1
+ *
+ *
+ *       判断检查数超过了则消息会被消费掉， RMQ_SYS_TRANS_HALF_TOPIC 然后偏移量+1
+ *        7 代表下一次偏移量   6已被消费  {回滚或提交}
+ *        26 下一次偏移量      25已被消费
+ *        {
+ * 	"offsetTable":{
+ * 		"RMQ_SYS_TRANS_OP_HALF_TOPIC@CID_RMQ_SYS_TRANS":{0:7
+ *                },
+ * 		"RMQ_SYS_TRANS_HALF_TOPIC@CID_RMQ_SYS_TRANS":{0:26
+ *        }    * 	}
+ * }
+ *
+ *        没新增一个事务或者检查一次 会新增 一条啊 RMQ_SYS_TRANS_HALF_TOPIC消息 检查会修改检查数
+ *        提交或回滚会新增RMQ_SYS_TRANS_OP_HALF_TOPIC 消息 提交会新增一条原始消息插入到commitlog内
+ *
+ *    Rocketmq 采用的是顺序写 去修改内容无法保证高性能
+ *
+ *    发起回查
+ *    {@link AbstractTransactionalMessageCheckListener#sendCheckMessage(org.apache.rocketmq.common.message.MessageExt)}
+ *
+ *    回查次数超限及时间过期的消息会存入到 TRANS_CHECK_MAX_TIME_TOPIC
  *
  */
 public class BrokerStartup {
