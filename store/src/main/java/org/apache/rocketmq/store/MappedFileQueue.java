@@ -43,7 +43,13 @@ public class MappedFileQueue {
 
     private final AllocateMappedFileService allocateMappedFileService;
 
+    /**
+     * 当前刷盘指针，表示该指针之前的所有数据全部持久化到磁盘。
+     */
     private long flushedWhere = 0;
+    /**
+     * 当前数据提交指针，内存中ByteBuffer当前的写指针，该值大于等于flushedWhere。
+     */
     private long committedWhere = 0;
 
     private volatile long storeTimestamp = 0;
@@ -454,6 +460,11 @@ public class MappedFileQueue {
 
     /**
      * Finds a mapped file by offset.
+     * 根据消息偏移量offset查找MappedFile。
+     * 根据offet查找MappedFile直接使用offset％mappedFileSize是否可行？答案是否定的，由于使用了内存映射，只要存在于存储目录下的文件，都需要对应创建内存映射文件，如果不定时将已消费的消息从存储文件中删除，
+     *
+     *  使用了内存映射，只要存在于存储目录下的文件，都需要对应创建内存映射文件，如果不定时将已消费的消息从存储文件中删除，会造成极大的内存压力与资源浪费，所有RocketMQ采取定时删除存储文件的策略，
+     *  也就是说在存储文件中，第一个文件不一定是00000000000000000000，因为该文件在某一时刻会被删除，故根据offset定位MappedFile的算法为（int）（（offset/this.mappedFileSize）-（mappedFile.getFileFromOffset()/this.MappedFileSize））。
      *
      * @param offset Offset.
      * @param returnFirstOnNotFound If the mapped file is not found, then return the first one.

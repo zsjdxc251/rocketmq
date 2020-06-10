@@ -1542,6 +1542,7 @@ public class CommitLog {
             this.resetByteBuffer(storeHostHolder, storeHostLength);
 
             // 等于  client offsetMsgId
+            // ip (4个字节) + 端口号 (4个字节) + 8个字节消息偏移量
             String msgId;
             if ((sysflag & MessageSysFlag.STOREHOSTADDRESS_V6_FLAG) == 0) {
                 msgId = MessageDecoder.createMessageId(this.msgIdMemory, msgInner.getStoreHostBytes(storeHostHolder), wroteOffset);

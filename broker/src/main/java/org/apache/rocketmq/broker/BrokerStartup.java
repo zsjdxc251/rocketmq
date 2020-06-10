@@ -61,6 +61,7 @@ import org.apache.rocketmq.store.CommitLog;
 import org.apache.rocketmq.store.ConsumeQueue;
 import org.apache.rocketmq.store.DefaultMessageStore;
 import org.apache.rocketmq.store.DispatchRequest;
+import org.apache.rocketmq.store.MappedFileQueue;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.MessageStoreConfig;
 import org.apache.rocketmq.store.ha.HAConnection;
@@ -128,13 +129,15 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *   如何知道该文件的偏移量 {@link DefaultMessageStore#recover(boolean)} {@link CommitLog#recoverNormally(long)}
  *
- *   刷盘
+ *   刷盘 jvm之外内存
+ *
+ *   为什么要空闲八个字节 {@link CommitLog.DefaultAppendMessageCallback#END_FILE_MIN_BLANK_LENGTH}
  *
  *  处理发送结果
  * @see  SendMessageProcessor#handlePutMessageResult(org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader, org.apache.rocketmq.broker.mqtrace.SendMessageContext, io.netty.channel.ChannelHandlerContext, int)
  *
  *
- *
+ *    {@link MappedFileQueue#getMaxOffset()} 为什么
  *
  *   {@link DefaultMessageStore#doDispatch(org.apache.rocketmq.store.DispatchRequest)}
  *
