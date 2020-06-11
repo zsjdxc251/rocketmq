@@ -532,6 +532,7 @@ public class ConsumeQueue {
         return index + totalUnitsInFile - index % totalUnitsInFile;
     }
 
+
     public String getTopic() {
         return topic;
     }

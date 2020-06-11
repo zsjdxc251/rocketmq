@@ -133,6 +133,8 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *   为什么要空闲八个字节 {@link CommitLog.DefaultAppendMessageCallback#END_FILE_MIN_BLANK_LENGTH}
  *
+ *   所有系统 topic 意义 ？
+ *
  *  处理发送结果
  * @see  SendMessageProcessor#handlePutMessageResult(org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.remoting.protocol.RemotingCommand, org.apache.rocketmq.common.message.MessageExt, org.apache.rocketmq.common.protocol.header.SendMessageResponseHeader, org.apache.rocketmq.broker.mqtrace.SendMessageContext, io.netty.channel.ChannelHandlerContext, int)
  *
@@ -160,9 +162,13 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  * 刷盘操作
  *
- *
+ *    /** 异步刷盘 && 开启内存字节缓冲区
  *   {@link CommitLog.CommitRealTimeService}
+ *   /** 异步刷盘
+ *
  *   {@link CommitLog.FlushRealTimeService}
+ *
+ *   /** 同步刷盘
  *   {@link CommitLog.GroupCommitService}
  *
  *   {@link CommitLog#handleDiskFlush(org.apache.rocketmq.store.AppendMessageResult, org.apache.rocketmq.store.PutMessageResult, org.apache.rocketmq.common.message.MessageExt)}

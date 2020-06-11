@@ -39,6 +39,9 @@ public class TransientStorePool {
     public TransientStorePool(final MessageStoreConfig storeConfig) {
         this.storeConfig = storeConfig;
         this.poolSize = storeConfig.getTransientStorePoolSize();
+        /**
+         *  表明 TransientStorePool只为commitlog服务
+         */
         this.fileSize = storeConfig.getMappedFileSizeCommitLog();
         this.availableBuffers = new ConcurrentLinkedDeque<>();
     }
