@@ -325,6 +325,8 @@ import static org.apache.rocketmq.remoting.netty.TlsSystemConfig.TLS_ENABLE;
  *
  *    回查次数超限及时间过期的消息会存入到 TRANS_CHECK_MAX_TIME_TOPIC
  *
+ *    {@link DefaultMessageStore#cleanFilesPeriodically()} 清除策略
+ *
  */
 public class BrokerStartup {
 
