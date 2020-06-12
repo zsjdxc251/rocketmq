@@ -32,7 +32,7 @@ public class BrokerConfig {
     @ImportantField
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
     @ImportantField
-    private String brokerIP1 = RemotingUtil.getLocalAddress();
+    private String brokerIP1 = "127.0.0.1";//RemotingUtil.getLocalAddress();
     private String brokerIP2 = RemotingUtil.getLocalAddress();
     @ImportantField
     private String brokerName = localHostName();
@@ -120,7 +120,7 @@ public class BrokerConfig {
     private long consumerFallbehindThreshold = 1024L * 1024 * 1024 * 16;
 
     private boolean brokerFastFailureEnable = true;
-    private long waitTimeMillsInSendQueue = 200;
+    private long waitTimeMillsInSendQueue = 200000;
     private long waitTimeMillsInPullQueue = 5 * 1000;
     private long waitTimeMillsInHeartbeatQueue = 31 * 1000;
     private long waitTimeMillsInTransactionQueue = 3 * 1000;
