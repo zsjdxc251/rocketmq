@@ -1416,6 +1416,16 @@ public class CommitLog {
         private volatile List<GroupCommitRequest> requestsWrite = new ArrayList<GroupCommitRequest>();
         /**
          * GroupCommitService线程每次处理的request容器，这是一个设计亮点，避免了任务提交与任务执行的锁冲突。
+         *
+         *  交换读取
+         *    写 用 requestsWrite
+         *    读 用  requestsRead
+         *
+         *    一轮循环之后 容器交换
+         *    写 用 requestsWrite  -> requestsRead
+         *    读 用 requestsRead   -> requestsWrite
+         *
+         *
          */
         private volatile List<GroupCommitRequest> requestsRead = new ArrayList<GroupCommitRequest>();
 
